@@ -9,7 +9,7 @@ import serial
 import time
 
 #host(server) 就是你的這台電腦，Define server address(讓之後client(browser可以知道server的IP位置))
-host_name = '192.168.100.4'  # IP Address of Raspberry Pi (就是你電腦的IP) 要選Wi-Fi的IPv4 !!
+host_name = '192.168.100.11'  # IP Address of Raspberry Pi (就是你電腦的IP) 要選Wi-Fi的IPv4 !!
 host_port = 8000 #自己給的Port
 
 #當在web browser打http://10.120.161.20:8000，會送一個request 給IP=10.120.161.20 on port 8000 的那個位置，而那位置就是server，server 會接收到client browser來的request
@@ -60,11 +60,13 @@ class MyServer(BaseHTTPRequestHandler):
             
             <form id="movementForm" action="/" method="POST" onsubmit="return false;"> 
                     Control Panel : 
-                    <button type="button" id="moveLButton" onmousedown="holdButton('Right')" onmouseup="releaseButton()">Right</button>
-                    <button type="button" id="moveRButton" onmousedown="holdButton('Left')" onmouseup="releaseButton()">Left</button>   
-                    <button type="button" id="moveFButton" onmousedown="holdButton('Front')" onmouseup="releaseButton()">Front</button>
-                    <button type="button" id="moveBButton" onmousedown="holdButton('Back')" onmouseup="releaseButton()">Back</button>    
+                    <button type="button" id="moveLButton" onmousedown="holdButton('Left')" onmouseup="releaseButton('Stop')">Left</button>
+                    <button type="button" id="moveRButton" onmousedown="holdButton('Right')" onmouseup="releaseButton('Stop')">Right</button>
+                    <button type="button" id="moveFButton" onmousedown="holdButton('Front')" onmouseup="releaseButton('Stop')">Front</button>
+                    <button type="button" id="moveBButton" onmousedown="holdButton('Back')" onmouseup="releaseButton('Stop')">Back</button>    
             </form>
+            <button type="button" id="vacuumOnButton" onmousedown="holdButton('VacuumOn')" onmouseup="releaseButton_noSerial()">VacuumOn</button>
+            <button type="button" id="vacuumOffButton" onmousedown="holdButton('VacuumOff')" onmouseup="releaseButton_noSerial()">VacuumOff</button> 
 
             
 
@@ -82,7 +84,13 @@ class MyServer(BaseHTTPRequestHandler):
                         }}, 500); // Adjust the interval time as needed (500 ms here)
                     }}
 
-                    function releaseButton() {{
+                    function releaseButton(state) {{
+                        // Clear the interval when the button is released
+                        clearInterval(interval);
+                        sendRequest(state);
+                    }}
+                    
+                    function releaseButton_noSerial() {{
                         // Clear the interval when the button is released
                         clearInterval(interval);
                     }}
@@ -128,15 +136,41 @@ class MyServer(BaseHTTPRequestHandler):
 
         # setupGPIO()
 
-        if post_data == 'On':
-            # GPIO.output(18, GPIO.HIGH)
-            print("Botton On is clicked")
-            ser.write(b"red\n")
-        else:
-            # GPIO.output(18, GPIO.LOW)
-            print("Botton Off is clicked")
+#         if post_data == 'On':
+#             # GPIO.output(18, GPIO.HIGH)
+#             print("Botton On is clicked")
+#             ser.write(b"red\n")
+#         else:
+#             # GPIO.output(18, GPIO.LOW)
+#             print("Botton Off is clicked")
 
         print("Turn {}".format(post_data))
+#         ser.write(b"%s\n" %(post_data).encode())
+#         if post_data == 'Left':
+#             print("LEFT is clicked")
+#             ser.write(b"Left\n")
+#         elif post_data == 'Right':
+#             print("RIGHT is clicked")
+#             ser.write(b"Right\n")
+#         elif post_data == 'Front':
+#             print("Front is clicked")
+#             ser.write(b"Front\n")
+#         elif post_data == 'Back':
+#             print("Back is clicked")
+#             ser.write(b"Back\n")
+#         elif post_data == 'Stop':
+#             print("Stop is clicked")
+#             ser.write(b"Stop\n")
+        try:
+            NowCommant = post_data.encode()
+            ser.write(b"%s\n" %(NowCommant))
+        except:
+            pass
+        
+#         try:
+#             ser.write(b"%s\n" %(post_data))
+#         except:
+#             pass
         self._redirect('/')  # 就是會自動刷新這個root URL page，所以新的資料會被自動更新上去 Redirect back to the root url 
         # After handling the form submission (turning the LED on or off), this line effectively refreshes the page 
         # or shows the updated status, preventing the browser from resubmitting the form if the user refreshes the page.
@@ -145,8 +179,18 @@ class MyServer(BaseHTTPRequestHandler):
 if __name__ == '__main__':
     http_server = HTTPServer((host_name, host_port), MyServer)
     print("Server Starts - %s:%s" % (host_name, host_port))
+    ttyACM=0
+    try:
+        ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+        ttyACM=0
+    except:
+        ser = serial.Serial('/dev/ttyACM1', 9600, timeout=1)
+        ttyACM=1
+        
+    print("Arduino plugged in '/dev/ttyACM%d'" % (ttyACM))
 
-    ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+
+    
     print("Serial Starts")
     ser.flush() #flush out every thing in the buffer
 
