@@ -36,6 +36,10 @@ class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
         html = '''
            <html>
+           <head>
+            <link rel="stylesheet" href="styles.css">
+            <title>Vacuum Control WebApp </title>        
+           </head>
            <body 
             style="width:960px; margin: 20px auto;">
            <h1>Welcome to my Raspberry Pi</h1>

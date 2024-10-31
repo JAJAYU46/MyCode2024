@@ -1,0 +1,89 @@
+h1{
+    color: orange;
+}
+p{
+    color: slateblue;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f8ff;
+    color: #333;
+    width: 960px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+#movementForm {
+    margin-top: 20px;
+    display: grid;
+    grid-template-areas:
+        ". front ."
+        "left . right"
+        ". back .";
+    gap: 10px;
+    justify-content: center;
+}
+#moveLButton { grid-area: left; }
+#moveRButton { grid-area: right; }
+#moveFButton { grid-area: front; }
+#moveBButton { grid-area: back; }
+
+#movementForm button {
+    background-color: #2697b6;
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+#movementForm button:hover {
+    background-color: #ffb700;
+}
+
+
+
+
+/* Medium screens (tablets) */
+@media (max-width: 1440px) {
+    button {
+        padding: 12px 20px;
+        font-size: 16px;
+    }
+    #controlPanelContainer {
+        transform: translate(-50%, -45%);
+    }
+}
+@media (max-width: 768px) {
+    button {
+        padding: 12px 20px;
+        font-size: 16px;
+    }
+    #controlPanelContainer {
+        transform: translate(-50%, -45%);
+    }
+}
+
+/* Small screens (mobile devices) */
+/* @media (max-width: 480px) {
+    #movementForm {
+        grid-template-areas:
+            "moveFButton"
+            "moveLButton"
+            "moveRButton"
+            "moveBButton";
+    }
+    button {
+        width: 100%; 
+        padding: 10px;
+        font-size: 14px;
+    }
+    h1 {
+        font-size: 20px;
+    }
+    #controlPanelContainer {
+        width: 90%;
+        transform: translate(-50%, -40%);
+    }
+} */
