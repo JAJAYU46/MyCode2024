@@ -1,12 +1,12 @@
-// double TurnFPer = 230 / 150;  //150
-// double TurnBPer = 1;          //150
-// double TurnRPer = 230 / 200;  //想要右轉照比例條多快多慢//200
-// double TurnLPer = 230 / 200;  //200
+double TurnFPer = 230 / 150;  //150
+double TurnBPer = 1;          //150
+double TurnRPer = 230 / 200;  //想要右轉照比例條多快多慢//200
+double TurnLPer = 230 / 200;  //200
 
-double TurnFPer = 0.5;  //150
-double TurnBPer = 0.5;          //150
-double TurnRPer = 150/250;  //想要右轉照比例條多快多慢//200
-double TurnLPer = 150/250;  //200
+// double TurnFPer = 0.5;  //150
+// double TurnBPer = 0.5;          //150
+// double TurnRPer = 150/250;  //想要右轉照比例條多快多慢//200
+// double TurnLPer = 150/250;  //200
 double RMTonePara = 1.0;  //(調整左右馬達速差的參，乘在右邊馬達數值上)
 
 void TurnRight(int lm1 = 0, int lm2 = 250, int rm1 = 100, int rm2 = 0) {  //leftMotor(1是逆轉)//200,200//200
