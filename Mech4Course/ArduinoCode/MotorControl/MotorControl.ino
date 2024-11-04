@@ -20,17 +20,18 @@ void setup() {
   pinMode(rightMotorPin1, OUTPUT);
   pinMode(rightMotorPin2, OUTPUT);
   pinMode(VacuumRelayPin, OUTPUT);
-  digitalWrite(LEDPin_L, HIGH);
-  digitalWrite(LEDPin_R, HIGH);
-  delay(2000);
-  digitalWrite(LEDPin_L, LOW);
-  digitalWrite(LEDPin_R, LOW);
+  // digitalWrite(LEDPin_L, HIGH);
+  // digitalWrite(LEDPin_R, HIGH);
+  // delay(2000);
+  // digitalWrite(LEDPin_L, LOW);
+  // digitalWrite(LEDPin_R, LOW);
 
   
   //Serial.println("Type Command (white, blue, red, all, off)");
 }
 
 void loop() {
+  // Frontward();
   if (Serial.available()) { //如果有從USB那邊接收到Serial資料的話
     command = Serial.readStringUntil('\n');
     command.trim();
