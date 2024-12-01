@@ -5,6 +5,7 @@ import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 host_name = '10.120.161.20'  # IP Address of Raspberry Pi
+host_name = '10.20.28.237'
 host_port = 8000
 
 
