@@ -7,6 +7,7 @@ String command;
 #define rightMotorPin1  10  //右負
 #define rightMotorPin2  11  //右正
 #define VacuumRelayPin 13
+#define LEDPin 12
 
 #include "MoveFunction.h"
 
@@ -32,14 +33,18 @@ void setup() {
 
 void loop() {
   // Frontward();
+  // TurnRight();
+  // Serial.println("Type Command (white, blue, red, all, off)");
   if (Serial.available()) { //如果有從USB那邊接收到Serial資料的話
     command = Serial.readStringUntil('\n');
     command.trim();
     if (command.equals("Left")) {
-      TurnLeft();
+      TurnLeft(0, 100, 0, 250);
+      // TurnLeft();
       //turn right
     }else if (command.equals("Right")) {
-      TurnRight();
+      TurnRight(0, 250, 0, 100);
+      // TurnRight();
     }else if (command.equals("Front")) {
       Frontward();
     }else if (command.equals("Back")) {
@@ -50,6 +55,10 @@ void loop() {
       digitalWrite(VacuumRelayPin, HIGH);
     }else if (command.equals("VacuumOff")) {
       digitalWrite(VacuumRelayPin, LOW);
+    }else if (command.equals("BigLeft")) {
+      BigTurnLeft();
+    }else if (command.equals("BigRight")) {
+      BigTurnRight();
     }
     Serial.print("Command: ");
     Serial.println(command);
