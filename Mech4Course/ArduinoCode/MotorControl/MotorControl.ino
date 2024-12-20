@@ -39,7 +39,7 @@ void loop() {
     command = Serial.readStringUntil('\n');
     command.trim();
     if (command.equals("Left")) {
-      TurnLeft(0, 100, 0, 250);
+      TurnLeft(0, 200, 0, 250);
       // TurnLeft();
       //turn right
     }else if (command.equals("Right")) {
@@ -56,6 +56,8 @@ void loop() {
     }else if (command.equals("VacuumOff")) {
       digitalWrite(VacuumRelayPin, LOW);
     }else if (command.equals("BigLeft")) {
+      Backward();
+      delay(500);
       BigTurnLeft();
     }else if (command.equals("BigRight")) {
       BigTurnRight();

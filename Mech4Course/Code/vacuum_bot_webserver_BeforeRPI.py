@@ -5,7 +5,7 @@ import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 #host(server) 就是你的這台電腦，Define server address(讓之後client(browser可以知道server的IP位置))
-host_name = '192.168.100.4'  # IP Address of Raspberry Pi (就是你電腦的IP) 要選Wi-Fi的IPv4 !!
+host_name = '10.118.180.125'  # IP Address of Raspberry Pi (就是你電腦的IP) 要選Wi-Fi的IPv4 !!
 host_port = 8000 #自己給的Port
 
 #當在web browser打http://10.120.161.20:8000，會送一個request 給IP=10.120.161.20 on port 8000 的那個位置，而那位置就是server，server 會接收到client browser來的request
