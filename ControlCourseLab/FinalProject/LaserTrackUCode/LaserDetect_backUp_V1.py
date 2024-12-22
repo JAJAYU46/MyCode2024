@@ -1,3 +1,4 @@
+# Backup
 # for camera
 import cv2
 print(cv2.__version__)
@@ -47,19 +48,7 @@ def filterColor(img, imgHSV, h_min, h_max, s_min, s_max, v_min, v_max):
     imgColorFilt = cv2.bitwise_and(img, img, mask=imgMask)
     #取img和img的交集(1 1 true...)，再套上遮罩，這個遮罩的區域就是imgMask
     return imgColorFilt
-def filterColor_getMask(img, imgHSV, h_min, h_max, s_min, s_max, v_min, v_max): 
-    #【4.過濾顏色】
-    lower = np.array([h_min, s_min, v_min])
-    upper = np.array([h_max, s_max, v_max])
-    
-    #找到留下之區(imgMask是一個遮罩)
-    imgMask = cv2.inRange(imgHSV,lower,upper) #過濾顏色 1st:要過濾的圖片名稱/2nd: 最小值/3rd: 最大值 (2nd,3rd皆用array表示)
-    #過濾顏色: 黑: 被過濾掉的顏色，白: 留下來沒被過濾掉顏色的地方區域(留下之區,白)
-    
-    #把留下之區套回原圖裁減保留，得到過濾顏色的效果
-    imgColorFilt = cv2.bitwise_and(img, img, mask=imgMask)
-    #取img和img的交集(1 1 true...)，再套上遮罩，這個遮罩的區域就是imgMask
-    return imgColorFilt, imgMask
+
 def DeterArea(img, areaThreshold): 
     #【另外複製一張圖片.copy】
     imgContour = img.copy()   #複製img這張圖放到imgContour中
@@ -138,7 +127,7 @@ def DeterLaserArea(img, areaThreshold, x1_bound, y1_bound, x2_bound, y2_bound):
         area = cv2.contourArea(cnt)  #取得輪廓(cnt)的面積
         sumArea += area
         
-        if(area > maxArea and area <40 and area>=6) : #夠小才有可能是雷射筆 #也要>=6才可以 #原本是>0而已
+        if(area > maxArea and area <40) : #夠小才有可能是雷射筆
             maxArea=area
             M = cv2.moments(cnt)
             if M and M["m00"] != 0:  # Ensure M exists and is valid

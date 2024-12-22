@@ -6,7 +6,7 @@ import time
 
 
 
-IsDebug = False
+IsDebug = True
 
 
 #【創建函式】
@@ -47,7 +47,7 @@ def filterColor(img, imgHSV, h_min, h_max, s_min, s_max, v_min, v_max):
     imgColorFilt = cv2.bitwise_and(img, img, mask=imgMask)
     #取img和img的交集(1 1 true...)，再套上遮罩，這個遮罩的區域就是imgMask
     return imgColorFilt
-def filterColor_getMask(img, imgHSV, h_min, h_max, s_min, s_max, v_min, v_max): 
+def filterColor_mask(img, imgHSV, h_min, h_max, s_min, s_max, v_min, v_max): 
     #【4.過濾顏色】
     lower = np.array([h_min, s_min, v_min])
     upper = np.array([h_max, s_max, v_max])
@@ -138,7 +138,7 @@ def DeterLaserArea(img, areaThreshold, x1_bound, y1_bound, x2_bound, y2_bound):
         area = cv2.contourArea(cnt)  #取得輪廓(cnt)的面積
         sumArea += area
         
-        if(area > maxArea and area <40 and area>=6) : #夠小才有可能是雷射筆 #也要>=6才可以 #原本是>0而已
+        if(area > maxArea and area <40) : #夠小才有可能是雷射筆
             maxArea=area
             M = cv2.moments(cnt)
             if M and M["m00"] != 0:  # Ensure M exists and is valid
@@ -240,235 +240,85 @@ def DeterBlueBoundingArea(img, areaThreshold):
 
 
 #============================ the public function ===================================
-def getLaserCoordinate(img2): 
-    BlueRangeSelectorFlag = True #True
-    #[Parameters]
-    #The already refined parameters will be setted here, if want to justify a new one, run main
-    h_min, h_max, s_min, s_max, v_min, v_max = 63, 99, 35, 124, 159, 255   # for filter 只留下綠色雷射筆色
-    h_min_b, h_max_b, s_min_b, s_max_b, v_min_b, v_max_b = 27, 163, 69, 255, 0, 255   # 89, 140, 90, 255, 0, 255) #89, 140, 99, 255, 50, 255   #60, 168, 0, 255, 0, 210)###########################################################################
+# def getLaserCoordinate(img2): 
+#     BlueRangeSelectorFlag = True #True
+#     #[Parameters]
+#     #The already refined parameters will be setted here, if want to justify a new one, run main
+#     h_min, h_max, s_min, s_max, v_min, v_max = 63, 99, 35, 124, 159, 255   # for filter 只留下綠色雷射筆色
+#     h_min_b, h_max_b, s_min_b, s_max_b, v_min_b, v_max_b = 27, 163, 69, 255, 0, 255   # 89, 140, 90, 255, 0, 255) #89, 140, 99, 255, 50, 255   #60, 168, 0, 255, 0, 210)###########################################################################
 
 
 
-    # img2 = cv2.resize(img2, (0, 0), fx=0.5, fy=0.5)
-    img2HSV = cv2.cvtColor(img2,cv2.COLOR_BGR2HSV)
-    img2_filter = filterColor(img2, img2HSV, h_min, h_max, s_min, s_max, v_min, v_max)
-    result_image = img2.copy()
-    if(IsDebug): 
-        cv2.imshow('LaserFilterImg', img2_filter)
+#     # img2 = cv2.resize(img2, (0, 0), fx=0.5, fy=0.5)
+#     img2HSV = cv2.cvtColor(img2,cv2.COLOR_BGR2HSV)
+#     img2_filter = filterColor(img2, img2HSV, h_min, h_max, s_min, s_max, v_min, v_max)
+#     result_image = img2.copy()
+#     if(IsDebug): 
+#         cv2.imshow('LaserFilterImg', img2_filter)
 
 
-    if BlueRangeSelectorFlag==True:
-        print("ok1")
-        # Filter Blue Color To get the Blue Bounding Box
-        img2_filter_blue = filterColor(img2, img2HSV, h_min_b, h_max_b, s_min_b, s_max_b, v_min_b, v_max_b)
-        x1_bound, y1_bound, x2_bound, y2_bound = DeterBlueBoundingArea(img2_filter_blue, 10)
-        result_image = cv2.rectangle(result_image, (x1_bound, y1_bound), (x2_bound, y2_bound), (0, 255, 0), 2)
-        if(IsDebug):
-            bound_image = cv2.rectangle(img2, (x1_bound, y1_bound), (x2_bound, y2_bound), (0, 255, 0), 2)  # Draw axis-aligned box
-            bound_image2 = cv2.rectangle(img2_filter_blue, (x1_bound, y1_bound), (x2_bound, y2_bound), (0, 255, 0), 2)  # Draw axis-aligned box
+#     if BlueRangeSelectorFlag==True:
+#         print("ok1")
+#         # Filter Blue Color To get the Blue Bounding Box
+#         img2_filter_blue = filterColor(img2, img2HSV, h_min_b, h_max_b, s_min_b, s_max_b, v_min_b, v_max_b)
+#         x1_bound, y1_bound, x2_bound, y2_bound = DeterBlueBoundingArea(img2_filter_blue, 10)
+#         result_image = cv2.rectangle(result_image, (x1_bound, y1_bound), (x2_bound, y2_bound), (0, 255, 0), 2)
+#         if(IsDebug):
+#             bound_image = cv2.rectangle(img2, (x1_bound, y1_bound), (x2_bound, y2_bound), (0, 255, 0), 2)  # Draw axis-aligned box
+#             bound_image2 = cv2.rectangle(img2_filter_blue, (x1_bound, y1_bound), (x2_bound, y2_bound), (0, 255, 0), 2)  # Draw axis-aligned box
         
         
-            cv2.imshow('Blue bound_image ', bound_image)
-            cv2.imshow('Blue bound_image2 ', bound_image2)
-    else: 
-        print("ok2")
-        x1_bound = 0
-        y1_bound = 0
-        x2_bound = img2_filter.shape[1]
-        y2_bound = img2_filter.shape[0]
+#             cv2.imshow('Blue bound_image ', bound_image)
+#             cv2.imshow('Blue bound_image2 ', bound_image2)
+#     else: 
+#         print("ok2")
+#         x1_bound = 0
+#         y1_bound = 0
+#         x2_bound = img2_filter.shape[1]
+#         y2_bound = img2_filter.shape[0]
 
-    # DetectRed, img2Contour, img2Canny = DeterArea(img2_filter, 2000) #areaThreshold
+#     # DetectRed, img2Contour, img2Canny = DeterArea(img2_filter, 2000) #areaThreshold
 
-    LaserCenter, img2Contour, img2Canny = DeterLaserArea(img2_filter, 0, x1_bound, y1_bound, x2_bound, y2_bound) #2000#areaThreshold不太好
-    # LaserCenter, img2Contour, img2Canny = DeterLaserArea(img2_filter, 0, 0, 0, img2_filter.shape[1], img2_filter.shape[0]) 
-    # Draw the center point
-    if(IsDebug):
-        cv2.imshow('img2Contour', img2Contour)
-        cv2.imshow('img2Canny', img2Canny)
+#     LaserCenter, img2Contour, img2Canny = DeterLaserArea(img2_filter, 0, x1_bound, y1_bound, x2_bound, y2_bound) #2000#areaThreshold不太好
+#     # LaserCenter, img2Contour, img2Canny = DeterLaserArea(img2_filter, 0, 0, 0, img2_filter.shape[1], img2_filter.shape[0]) 
+#     # Draw the center point
+#     if(IsDebug):
+#         cv2.imshow('img2Contour', img2Contour)
+#         cv2.imshow('img2Canny', img2Canny)
     
-    result_image = cv2.circle(result_image, LaserCenter, 5, (0, 255, 255), -1)  # Yellow dot at the center
-    result_image = cv2.putText(result_image, f"({LaserCenter[0]}, {LaserCenter[1]})", (LaserCenter[0]-50, LaserCenter[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0,255,255), 1, cv2.LINE_AA)
+#     result_image = cv2.circle(result_image, LaserCenter, 5, (0, 255, 255), -1)  # Yellow dot at the center
+#     result_image = cv2.putText(result_image, f"({LaserCenter[0]}, {LaserCenter[1]})", (LaserCenter[0]-50, LaserCenter[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0,255,255), 1, cv2.LINE_AA)
             
-    # cv2.putText(imgContour, f"{int(maxArea)}", (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,  0.5, (255, 255, 255), 2) # 在輪廓的中心位置添加文字，顯示該輪廓的面積
+#     # cv2.putText(imgContour, f"{int(maxArea)}", (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,  0.5, (255, 255, 255), 2) # 在輪廓的中心位置添加文字，顯示該輪廓的面積
     
-    # cv2.imshow('OriginalImg', result_image)
-    return LaserCenter, result_image
+#     # cv2.imshow('OriginalImg', result_image)
+#     return LaserCenter, result_image
 
 
-#==================== using the   function above (main example) ====================
-if __name__ == '__main__':
-    print("Laser Detect Starts")
-    #======================= setup camera ======================
-    cap=cv2.VideoCapture(1) #1
-    try:
-        while True:
-            # ================= Camera ===============================
-            ret2, img = cap.read()
-            img2 = img.copy()
-            img2 = cv2.resize(img2, (0, 0), fx=0.5, fy=0.5)
-            if not ret2:
-                print("Error: Could not read frame from camera")
-                break  # Exit the loop if camera is not functioning correctly
-
-            LaserCenter, result_image = getLaserCoordinate(img2) #2000#areaThreshold不太好
-            # Draw the center point
-            img2 = cv2.circle(img2, LaserCenter, 5, (0, 255, 255), -1)  # Yellow dot at the center
-            img2 = cv2.putText(img2, f"({LaserCenter[0]}, {LaserCenter[1]})", (LaserCenter[0]-50, LaserCenter[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0,255,255), 1, cv2.LINE_AA)
-            
-            # cv2.putText(imgContour, f"{int(maxArea)}", (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,  0.5, (255, 255, 255), 2) # 在輪廓的中心位置添加文字，顯示該輪廓的面積
-    
-            cv2.imshow('The original image draw with laser center', img2)
-            cv2.imshow('The result image generated by the function', result_image)
-
-#=========================================================
-
-
-            # Check for 'q' key press to exit the loop
-            if cv2.waitKey(10) & 0xFF == ord('q'):
-                # GPIO.cleanup()
-                break
-
-    except KeyboardInterrupt:
-        # RPI 8. Clean up
-        #GPIO.cleanup()
-        print("Code end")
-  
-
-
-
-
-
-#===================================【完整測試所有選色, 選色的code 不可刪!!】=============================================
+# #==================== using the   function above (main example) ====================
 # if __name__ == '__main__':
 #     print("Laser Detect Starts")
 #     #======================= setup camera ======================
-#     theCap=0
-#     # for i in range(5):  # Try indices 0-4
-#     #     try:
-#     #         cap = cv2.VideoCapture(i+1)
-#     #         print(f"Camera finding at index {i+1}")
-#     #         cv2.waitKey(20)
-#     #         if cap.isOpened():
-#     #             print(f"Camera found at index {i+1}")
-#     #             theCap=i+1
-#     #             break
-#     #     except: 
-#     #         continue
-#     # cap.release()
-#     # cap=cv2.VideoCapture(theCap)
 #     cap=cv2.VideoCapture(1) #1
-#     setColorFlag=True
-#     # DetectRed=False
-
-#     ret,img = cap.read()
-#     if ret: #如果ret是TRUE
-#         #cv2.imshow('The Original Image',img) #顯示出這張frame照片
-#         print("get first image")
-#     else:
-#         print("there are some problem for camera, stop code")
-        
-#     img = cv2.resize(img,(0,0),fx=0.5,fy=0.5)
-#     imgHSV = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
-
-#     h_min, h_max, s_min, s_max, v_min, v_max = 63, 99, 35, 124, 159, 255  # 0, 179, 0, 74, 233, 255#Green1(較不strict): 0, 179, 0, 179, 220, 255#Red Laser: 136, 179, 14, 255, 255, 255
-
-
-
-#     if(setColorFlag==True): 
-#         #【2.找到正確的顏色HSV限制值-在視窗'TrackBer'建立一個控制條】
-#         #創視窗
-#         cv2.namedWindow('TrackBar') #創建一個視窗1st[視窗名稱]
-#         cv2.resizeWindow('TrackBar',640,320) #調整視窗大小
-
-#         #在視窗'TrackBar'建立一個控制條
-#         #                   [控制條名稱][視窗名稱][bar最小值][最大值][更動完要呼叫的函式]
-#         cv2.createTrackbar('Hue Min','TrackBar', h_min, 179, empty)
-#         cv2.createTrackbar('Hue Max','TrackBar', h_max, 179, empty)
-#         cv2.createTrackbar('Saturation Min','TrackBar', s_min, 255, empty)
-#         cv2.createTrackbar('Saturation Max','TrackBar', s_max, 255, empty)
-#         cv2.createTrackbar('Value Min','TrackBar', v_min, 255, empty)
-#         cv2.createTrackbar('Value Max','TrackBar', v_max, 255, empty)
-
-#         while(True): 
-#             imgColorFilt, h_min, h_max, s_min, s_max, v_min, v_max=setColor(img, imgHSV)
-#             cv2.imshow('TrackBar',imgColorFilt)
-#             #要加if,要有break!!不然電腦判斷自己卡在迴圈裡就當機了
-#             if cv2.waitKey(10) & 0xFF == ord('d'):
-#                 cv2.destroyWindow('TrackBar')
-#                 break
-#             cv2.waitKey(1)
-
-#     print(h_min, h_max, s_min, s_max, v_min, v_max)
-
-
-
-#     vacuum_off_time = None  # <Debug> 要初始化在迴圈外面，不然一直重新設成None了，而且因為跨越迴圈之後還要記得資料Initialize a variable to store the time when vacuum is turned off
 #     try:
 #         while True:
 #             # ================= Camera ===============================
-#             ret2, img2 = cap.read()
+#             ret2, img = cap.read()
+#             img2 = img.copy()
+#             img2 = cv2.resize(img2, (0, 0), fx=0.5, fy=0.5)
 #             if not ret2:
 #                 print("Error: Could not read frame from camera")
 #                 break  # Exit the loop if camera is not functioning correctly
 
-#             # Resize img2 if necessary
-#             img2 = cv2.resize(img2, (0, 0), fx=0.5, fy=0.5)
-#             img2HSV = cv2.cvtColor(img2,cv2.COLOR_BGR2HSV)
-#             img2_filter = filterColor(img2, img2HSV, h_min, h_max, s_min, s_max, v_min, v_max)
-#             # Display the image in a window
-#             # cv2.imshow('OriginalImg', img2)
-#             cv2.imshow('FilterImg', img2_filter)
-
-#             # Filter Blue Color To get the Blue Bounding Box
-#             img2_filter_blue = filterColor(img2, img2HSV, 27, 163, 69, 255, 0, 255)#89, 140, 90, 255, 0, 255) #89, 140, 99, 255, 50, 255   #60, 168, 0, 255, 0, 210)###########################################################################
-#             x1_bound, y1_bound, x2_bound, y2_bound = DeterBlueBoundingArea(img2_filter_blue, 10)
-#             bound_image = cv2.rectangle(img2, (x1_bound, y1_bound), (x2_bound, y2_bound), (0, 255, 0), 2)  # Draw axis-aligned box
-#             bound_image2 = cv2.rectangle(img2_filter_blue, (x1_bound, y1_bound), (x2_bound, y2_bound), (0, 255, 0), 2)  # Draw axis-aligned box
-            
-#             cv2.imshow('bound_image ', bound_image)
-#             cv2.imshow('bound_image2 ', bound_image2)
-
-#             # DetectRed, img2Contour, img2Canny = DeterArea(img2_filter, 2000) #areaThreshold
-#             LaserCenter, img2Contour, img2Canny = DeterLaserArea(img2_filter, 0, x1_bound, y1_bound, x2_bound, y2_bound) #2000#areaThreshold不太好
-#             # LaserCenter, img2Contour, img2Canny = DeterLaserArea(img2_filter, 0, 0, 0, img2_filter.shape[1], img2_filter.shape[0]) 
+#             LaserCenter, result_image = getLaserCoordinate(img2) #2000#areaThreshold不太好
 #             # Draw the center point
-#             cv2.circle(img2, LaserCenter, 5, (0, 255, 255), -1)  # Yellow dot at the center
-
-            
-#             cv2.imshow('img2Contour', img2Contour)
-#             cv2.imshow('img2Canny', img2Canny)
-            
-#             # if DetectRed == False: 
-#             #     if vacuum_off_time and (time.time() - vacuum_off_time) < 5:
-#             #         pass
-#             #     else: 
-#             #         post_data_Red = 'VacuumOn'
-#             #         # print("Vacuum Status: " + post_data_Red)
-#             #         NowCommant_Red = post_data_Red.encode()
-#             #         vacuum_off_time = None  # Reset the off time
-
-#             # else: 
-#             #     # If red is detected, turn off the vacuum and record the time
-#             #     vacuum_off_time = time.time()  # Record the current time
-#             #     post_data_Red = 'VacuumOff'
-#             #     # print("Vacuum Status: " + post_data_Red)
-#             #     NowCommant_Red = post_data_Red.encode()
-#             #     # ser.write(b"%s\n" %(NowCommant_Red))
-#             # # print("Vacuum Status: " + post_data_Red)
-#             # # Draw the `post_data_Red` on the original image
-#             # font = cv2.FONT_HERSHEY_SIMPLEX
-#             # font_scale = 0.5
-#             # color = (0, 0, 255)  # Red color for the text
-#             # thickness = 2
-#             # position = (50, 50)  # Position of the text (x, y)
-
-#             # Overlay the text on the original image
-#             #LaserP: 
-#             cv2.putText(img2, f"({LaserCenter[0]}, {LaserCenter[1]})", (LaserCenter[0]-50, LaserCenter[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0,255,255), 1, cv2.LINE_AA)
+#             img2 = cv2.circle(img2, LaserCenter, 5, (0, 255, 255), -1)  # Yellow dot at the center
+#             img2 = cv2.putText(img2, f"({LaserCenter[0]}, {LaserCenter[1]})", (LaserCenter[0]-50, LaserCenter[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0,255,255), 1, cv2.LINE_AA)
             
 #             # cv2.putText(imgContour, f"{int(maxArea)}", (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,  0.5, (255, 255, 255), 2) # 在輪廓的中心位置添加文字，顯示該輪廓的面積
     
-#             cv2.imshow('OriginalImg', img2)
+#             cv2.imshow('The original image draw with laser center', img2)
+#             cv2.imshow('The result image generated by the function', result_image)
 
 # #=========================================================
 
@@ -478,27 +328,178 @@ if __name__ == '__main__':
 #                 # GPIO.cleanup()
 #                 break
 
-
-
-
-#             #Set camera 如果偵測到紅色圓圓就把vacuum停掉
-#             # ret2,img2 = cap.read()
-#             # if ret: #如果ret是TRUE
-#             #     cv2.imshow('The_original_image',img) #顯示出這張frame照片
-#             # else:
-#             #     print("there are some problem for camera, stop code")
-#             #     break  #如果ret不是true，就跳出這個while迴圈(影片結束or出問題了)
-#             # cv2.imshow('The_original_image',img2)
-#             # img2 = cv2.resize(img2,(0,0),fx=0.5,fy=0.5)
-#             # imgHSV = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
-
-#             # imgColorFilt = filterColor(imgHSV)
-#             # cv2.imshow('TrackBar1',img2)
-
-
-
-#             # time.sleep(1)
 #     except KeyboardInterrupt:
 #         # RPI 8. Clean up
 #         #GPIO.cleanup()
 #         print("Code end")
+  
+
+
+
+
+
+#===================================【完整測試所有選色, 選色的code 不可刪!!】=============================================
+if __name__ == '__main__':
+    print("Laser Detect Starts")
+    #======================= setup camera ======================
+    theCap=0
+    # for i in range(5):  # Try indices 0-4
+    #     try:
+    #         cap = cv2.VideoCapture(i+1)
+    #         print(f"Camera finding at index {i+1}")
+    #         cv2.waitKey(20)
+    #         if cap.isOpened():
+    #             print(f"Camera found at index {i+1}")
+    #             theCap=i+1
+    #             break
+    #     except: 
+    #         continue
+    # cap.release()
+    # cap=cv2.VideoCapture(theCap)
+    cap=cv2.VideoCapture(1) #1
+    setColorFlag=True
+    # DetectRed=False
+
+    ret,img = cap.read()
+    if ret: #如果ret是TRUE
+        #cv2.imshow('The Original Image',img) #顯示出這張frame照片
+        print("get first image")
+    else:
+        print("there are some problem for camera, stop code")
+        
+    img = cv2.resize(img,(0,0),fx=0.5,fy=0.5)
+    imgHSV = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
+
+    h_min, h_max, s_min, s_max, v_min, v_max = 63, 99, 35, 124, 159, 255  # 0, 179, 0, 74, 233, 255#Green1(較不strict): 0, 179, 0, 179, 220, 255#Red Laser: 136, 179, 14, 255, 255, 255
+
+
+
+    if(setColorFlag==True): 
+        #【2.找到正確的顏色HSV限制值-在視窗'TrackBer'建立一個控制條】
+        #創視窗
+        cv2.namedWindow('TrackBar') #創建一個視窗1st[視窗名稱]
+        cv2.resizeWindow('TrackBar',640,320) #調整視窗大小
+
+        #在視窗'TrackBar'建立一個控制條
+        #                   [控制條名稱][視窗名稱][bar最小值][最大值][更動完要呼叫的函式]
+        cv2.createTrackbar('Hue Min','TrackBar', h_min, 179, empty)
+        cv2.createTrackbar('Hue Max','TrackBar', h_max, 179, empty)
+        cv2.createTrackbar('Saturation Min','TrackBar', s_min, 255, empty)
+        cv2.createTrackbar('Saturation Max','TrackBar', s_max, 255, empty)
+        cv2.createTrackbar('Value Min','TrackBar', v_min, 255, empty)
+        cv2.createTrackbar('Value Max','TrackBar', v_max, 255, empty)
+
+        while(True): 
+            imgColorFilt, h_min, h_max, s_min, s_max, v_min, v_max=setColor(img, imgHSV)
+            cv2.imshow('TrackBar',imgColorFilt)
+            #要加if,要有break!!不然電腦判斷自己卡在迴圈裡就當機了
+            if cv2.waitKey(10) & 0xFF == ord('d'):
+                cv2.destroyWindow('TrackBar')
+                break
+            cv2.waitKey(1)
+
+    print(h_min, h_max, s_min, s_max, v_min, v_max)
+
+
+
+    vacuum_off_time = None  # <Debug> 要初始化在迴圈外面，不然一直重新設成None了，而且因為跨越迴圈之後還要記得資料Initialize a variable to store the time when vacuum is turned off
+    try:
+        while True:
+            # ================= Camera ===============================
+            ret2, img2 = cap.read()
+            if not ret2:
+                print("Error: Could not read frame from camera")
+                break  # Exit the loop if camera is not functioning correctly
+
+            # Resize img2 if necessary
+            img2 = cv2.resize(img2, (0, 0), fx=0.5, fy=0.5)
+            img2HSV = cv2.cvtColor(img2,cv2.COLOR_BGR2HSV)
+            img2_filter = filterColor(img2, img2HSV, h_min, h_max, s_min, s_max, v_min, v_max)
+            # Display the image in a window
+            # cv2.imshow('OriginalImg', img2)
+            cv2.imshow('FilterImg', img2_filter)
+
+            # Filter Blue Color To get the Blue Bounding Box
+            img2_filter_blue, img2_filter_mask = filterColor_mask(img2, img2HSV, 27, 163, 69, 255, 0, 255)#89, 140, 90, 255, 0, 255) #89, 140, 99, 255, 50, 255   #60, 168, 0, 255, 0, 210)###########################################################################
+            x1_bound, y1_bound, x2_bound, y2_bound = DeterBlueBoundingArea(img2_filter_blue, 10)
+            bound_image = cv2.rectangle(img2, (x1_bound, y1_bound), (x2_bound, y2_bound), (0, 255, 0), 2)  # Draw axis-aligned box
+            bound_image2 = cv2.rectangle(img2_filter_blue, (x1_bound, y1_bound), (x2_bound, y2_bound), (0, 255, 0), 2)  # Draw axis-aligned box
+            
+            cv2.imshow('bound_image ', bound_image)
+            cv2.imshow('bound_image2 ', bound_image2)
+            cv2.imshow('Mask', img2_filter_mask)
+
+            # DetectRed, img2Contour, img2Canny = DeterArea(img2_filter, 2000) #areaThreshold
+            LaserCenter, img2Contour, img2Canny = DeterLaserArea(img2_filter, 0, x1_bound, y1_bound, x2_bound, y2_bound) #2000#areaThreshold不太好
+            # LaserCenter, img2Contour, img2Canny = DeterLaserArea(img2_filter, 0, 0, 0, img2_filter.shape[1], img2_filter.shape[0]) 
+            # Draw the center point
+            cv2.circle(img2, LaserCenter, 5, (0, 255, 255), -1)  # Yellow dot at the center
+
+            
+            cv2.imshow('img2Contour', img2Contour)
+            cv2.imshow('img2Canny', img2Canny)
+            
+            # if DetectRed == False: 
+            #     if vacuum_off_time and (time.time() - vacuum_off_time) < 5:
+            #         pass
+            #     else: 
+            #         post_data_Red = 'VacuumOn'
+            #         # print("Vacuum Status: " + post_data_Red)
+            #         NowCommant_Red = post_data_Red.encode()
+            #         vacuum_off_time = None  # Reset the off time
+
+            # else: 
+            #     # If red is detected, turn off the vacuum and record the time
+            #     vacuum_off_time = time.time()  # Record the current time
+            #     post_data_Red = 'VacuumOff'
+            #     # print("Vacuum Status: " + post_data_Red)
+            #     NowCommant_Red = post_data_Red.encode()
+            #     # ser.write(b"%s\n" %(NowCommant_Red))
+            # # print("Vacuum Status: " + post_data_Red)
+            # # Draw the `post_data_Red` on the original image
+            # font = cv2.FONT_HERSHEY_SIMPLEX
+            # font_scale = 0.5
+            # color = (0, 0, 255)  # Red color for the text
+            # thickness = 2
+            # position = (50, 50)  # Position of the text (x, y)
+
+            # Overlay the text on the original image
+            #LaserP: 
+            cv2.putText(img2, f"({LaserCenter[0]}, {LaserCenter[1]})", (LaserCenter[0]-50, LaserCenter[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0,255,255), 1, cv2.LINE_AA)
+            
+            # cv2.putText(imgContour, f"{int(maxArea)}", (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,  0.5, (255, 255, 255), 2) # 在輪廓的中心位置添加文字，顯示該輪廓的面積
+    
+            cv2.imshow('OriginalImg', img2)
+
+#=========================================================
+
+
+            # Check for 'q' key press to exit the loop
+            if cv2.waitKey(10) & 0xFF == ord('q'):
+                # GPIO.cleanup()
+                break
+
+
+
+
+            #Set camera 如果偵測到紅色圓圓就把vacuum停掉
+            # ret2,img2 = cap.read()
+            # if ret: #如果ret是TRUE
+            #     cv2.imshow('The_original_image',img) #顯示出這張frame照片
+            # else:
+            #     print("there are some problem for camera, stop code")
+            #     break  #如果ret不是true，就跳出這個while迴圈(影片結束or出問題了)
+            # cv2.imshow('The_original_image',img2)
+            # img2 = cv2.resize(img2,(0,0),fx=0.5,fy=0.5)
+            # imgHSV = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
+
+            # imgColorFilt = filterColor(imgHSV)
+            # cv2.imshow('TrackBar1',img2)
+
+
+
+            # time.sleep(1)
+    except KeyboardInterrupt:
+        # RPI 8. Clean up
+        #GPIO.cleanup()
+        print("Code end")

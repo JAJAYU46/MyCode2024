@@ -1,6 +1,6 @@
 import cv2
 
-# import stage_1
+from stage_2.stage2_redPath import little_trace
 from tello import Tello
 from detection import detect_moving_objects
 from LaserDetect import getLaserCoordinate
@@ -11,12 +11,13 @@ def follow(tello: Tello, currentX: int, currentY: int, targetX: int, targetY: in
     x is pixels right from upperleft
     y is pixels down from upperleft
     """
-    proportion = 0.17    # 17 power per 100 pixels difference
+    proportion = 0.4  # 40 power per 100 pixels difference
+    verti_proportion = 1 #2
     roll = proportion * (targetX - currentX)                # pos: right
-    throttle = proportion * (currentY - targetY) + 11       # pos: up       with vertical offset
+    throttle = verti_proportion * (currentY - targetY)# + 10        # pos: up       with vertical offset
 
-    roll = min(roll, 100)
-    roll = max(-100, roll)
+    roll = min(roll, 50)
+    roll = max(-50, roll)
 
     throttle = min(throttle, 100)
     throttle = max(-100, throttle)
@@ -38,14 +39,16 @@ if __name__ == "__main__":
     
     preCenter = [0,0]
     center = [0,0]
-    mode = 'manual'
+    mode = 'pathing'
     proximity = 20  # 20 pixels is close enough
 
 
 
 
     # Target 現在追蹤到的雷射筆點
-    # targets = stage_1.square_pathing(frame, visualize = False)
+    targets = little_trace(img = frame, visualize = True)
+    #targets = targets[::-1]###############################################################################反過來存
+
     previousTarget = [0,0] #用來存之前的資料
     
     
@@ -64,6 +67,7 @@ if __name__ == "__main__":
 
         # Break the loop if the 'q' key is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
+            tello.send_command2("rc 0 0 0 0")
             tello.send_command("land")
             break
 
@@ -130,6 +134,10 @@ if __name__ == "__main__":
             # visualize
 
             target = targets[0]
+            target = (target[1], target[0])     # little_trace uses (y,x)
+            previousTarget[0] = target[0]
+            previousTarget[1] = target[1]
+
             cv2.circle(frame, (target[0], target[1]), proximity, (255, 0, 0), 5)
             follow(tello, center[0], center[1], target[0], target[1])
 
@@ -140,7 +148,8 @@ if __name__ == "__main__":
 
             if len(targets) == 0:
                 # done traversal, ending
-                mode = 'end'
+                
+                mode = 'laser'
 
         elif mode == "end":
             tello.send_command("land")
